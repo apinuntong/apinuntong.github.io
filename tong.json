@@ -3,7 +3,7 @@ module(...,package.seeall)
 require"pins"
 local level = 0
 
-local gpio = pins.setup(pio.P0_5,0)
+local gpio = pins.setup(pio.P0_4,0)
 sys.timerLoopStart(function()
     level = level==0 and 1 or 0
     gpio(level)
