@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Video Call</title>
+</head>
+<body>
+    <div id="video-container">
+        <video id="local-video" autoplay muted></video>
+        <video id="remote-video" autoplay></video>
+    </div>
+    <button id="start-call">Start Call</button>
+    <button id="end-call">End Call</button>
+
+    <!-- Include PeerJS library -->
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.4.2/dist/peerjs.min.js"></script>
+    <script>
+        // Create a PeerJS instance
+        const peer = new Peer();
+
+        // Get video elements from HTML
+        const localVideo = document.getElementById('local-video');
+        const remoteVideo = document.getElementById('remote-video');
+
+        // Get buttons from HTML
+        const startCallButton = document.getElementById('start-call');
+        const endCallButton = document.getElementById('end-call');
+
+        // Open a connection to the Peer server
+        peer.on('open', (peerId) => {
+            console.log('My peer ID is: ' + peerId);
+        });
+
+        // Handle incoming calls
+        peer.on('call', (call) => {
+            // Answer the incoming call and add the remote stream to the remote video element
+            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                .then((stream) => {
+                    call.answer(stream);
+                    call.on('stream', (remoteStream) => {
+                        remoteVideo.srcObject = remoteStream;
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error accessing media devices:', error);
+                });
+        });
+
+        // Handle start call button click
+        startCallButton.addEventListener('click', () => {
+            // Get the user's media stream
+            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                .then((stream) => {
+                    // Display the local stream in the local video element
+                    localVideo.srcObject = stream;
+
+                    // Call a remote peer and add the remote stream to the remote video element
+                    const call = peer.call('remote-peer-id', stream);
+                    call.on('stream', (remoteStream) => {
+                        remoteVideo.srcObject = remoteStream;
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error accessing media devices:', error);
+                });
+        });
+
+        // Handle end call button click
+        endCallButton.addEventListener('click', () => {
+            // Close the connection and stop the local video stream
+            peer.destroy();
+            localVideo.srcObject.getTracks().forEach(track => track.stop());
+            remoteVideo.srcObject = null;
+        });
+    </script>
+</body>
+</html>
