@@ -35,10 +35,10 @@
             // Answer the incoming call and add the remote stream to the remote video element
             navigator.mediaDevices.getUserMedia({ video: true, audio: true })
                 .then((stream) => {
-                    // call.answer(stream);
-                    call.on('stream', (remoteStream) => {
-                        remoteVideo.srcObject = remoteStream;
-                    });
+                    call.answer(stream);
+                    // call.on('stream', (remoteStream) => {
+                    //     remoteVideo.srcObject = remoteStream;
+                    // });
                 })
                 .catch((error) => {
                     console.error('Error accessing media devices:', error);
