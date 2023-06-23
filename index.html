@@ -19,36 +19,41 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.2.0/peerjs.min.js"></script>
   <script>
     // Initialize Peer object
-    var peer = new Peer('tong555533');
+    var peer = new Peer();
 
     // Get local video and display it
     navigator.mediaDevices.getUserMedia({ video: true, audio: false })
       .then(function(stream) {
         var localVideo = document.getElementById('localVideo');
         localVideo.srcObject = stream;
+
+        // Event handler when Peer object is open and ready
+        peer.on('open', function() {
+          console.log('My peer ID is: ' + peer.id);
+        });
+
+        // Event handler when Peer object receives a connection
+        peer.on('connection', function(conn) {
+          conn.on('open', function() {
+            console.log('Connected to another peer');
+
+            // Event handler when receiving data from the remote peer
+            conn.on('data', function(data) {
+              // Handle received data (in this case, video frames)
+              var remoteVideo = document.getElementById('remoteVideo');
+              remoteVideo.srcObject = data;
+            });
+          });
+        });
+
+        // Function to handle errors
+        peer.on('error', function(error) {
+          console.error('PeerJS error: ', error);
+        });
       })
       .catch(function(error) {
         console.error('Error accessing local media: ', error);
       });
-
-    // Event handler when Peer object receives a connection
-    peer.on('connection', function(conn) {
-      conn.on('open', function() {
-        console.log('Connected to another peer');
-
-        // Event handler when receiving data from the remote peer
-        conn.on('data', function(data) {
-          // Handle received data (in this case, video frames)
-          var remoteVideo = document.getElementById('remoteVideo');
-          remoteVideo.src = URL.createObjectURL(data);
-        });
-      });
-    });
-
-    // Function to handle errors
-    peer.on('error', function(error) {
-      console.error('PeerJS error: ', error);
-    });
   </script>
 </body>
 </html>
