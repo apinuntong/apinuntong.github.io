@@ -32,17 +32,15 @@
     //     });
     // }
     var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-    // peer.on('call', function(call) {
+    peer.on('call', function(call) {
       getUserMedia({video: true, audio: false}, function(stream2) {
-        call.answer(stream2); // Answer the call with an A/V stream.
-        // call.on('stream', function(remoteStream) {
-           var localVideo = document.getElementById('localVideo');
-           localVideo.srcObject = stream2;
-        // });
+        call.answer(stream2); 
+        var localVideo = document.getElementById('localVideo');
+        localVideo.srcObject = stream2;
       }, function(err) {
         console.log('Failed to get local stream' ,err);
       });
-    // });
+     });
 
     // Establish a call with another peer
     // function establishCall(localStream) {
