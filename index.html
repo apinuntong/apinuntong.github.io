@@ -21,7 +21,7 @@
 
     // Get the local video stream
     function getLocalStream() {
-      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      navigator.mediaDevices.getUserMedia({ video: true, audio: false })
         .then(function(stream) {
           var localVideo = document.getElementById('localVideo');
           localVideo.srcObject = stream;
