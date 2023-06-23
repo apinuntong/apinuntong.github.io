@@ -1,3 +1,54 @@
-<iframe width="450" height="260" style="border: 1px solid #cccccc;" src="https://thingspeak.com/channels/1044673/charts/1?bgcolor=%23ffffff&color=%23d62020&days=1&dynamic=true&results=60&title=current&type=line&yaxis=A"></iframe>
-<iframe width="450" height="260" style="border: 1px solid #cccccc;" src="https://thingspeak.com/channels/1044673/charts/2?bgcolor=%23ffffff&color=%23d62020&days=1&dynamic=true&results=60&title=voltage&type=line&yaxis=V"></iframe>
-<iframe width="450" height="260" style="border: 1px solid #cccccc;" src="https://thingspeak.com/channels/1044673/charts/3?bgcolor=%23ffffff&color=%23d62020&days=1&dynamic=true&results=60&title=power&type=line&yaxis=W"></iframe>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PeerJS Video Call</title>
+  <style>
+    #localVideo, #remoteVideo {
+      width: 400px;
+      height: 300px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>PeerJS Video Call</h1>
+
+  <video id="localVideo" autoplay></video>
+  <video id="remoteVideo" autoplay></video>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.2.0/peerjs.min.js"></script>
+  <script>
+    // Initialize Peer object
+    var peer = new Peer('tong555533');
+
+    // Get local video and display it
+    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+      .then(function(stream) {
+        var localVideo = document.getElementById('localVideo');
+        localVideo.srcObject = stream;
+      })
+      .catch(function(error) {
+        console.error('Error accessing local media: ', error);
+      });
+
+    // Event handler when Peer object receives a connection
+    peer.on('connection', function(conn) {
+      conn.on('open', function() {
+        console.log('Connected to another peer');
+
+        // Event handler when receiving data from the remote peer
+        conn.on('data', function(data) {
+          // Handle received data (in this case, video frames)
+          var remoteVideo = document.getElementById('remoteVideo');
+          remoteVideo.src = URL.createObjectURL(data);
+        });
+      });
+    });
+
+    // Function to handle errors
+    peer.on('error', function(error) {
+      console.error('PeerJS error: ', error);
+    });
+  </script>
+</body>
+</html>
