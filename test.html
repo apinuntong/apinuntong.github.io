@@ -54,7 +54,7 @@
                     localVideo.srcObject = stream;
 
                     // Call a remote peer and add the remote stream to the remote video element
-                    const call = peer.call('remote-peer-id', stream);
+                    const call = peer.call('c717c9c8-c381-4acc-a633-45c638a59406', stream);
                     call.on('stream', (remoteStream) => {
                         remoteVideo.srcObject = remoteStream;
                     });
