@@ -20,17 +20,17 @@
     });
 
     // Get the local video stream
-    // function getLocalStream() {
-    //   navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-    //     .then(function(stream) {
-    //       var localVideo = document.getElementById('localVideo');
-    //       localVideo.srcObject = stream;
-    //       establishCall(stream);
-    //     })
-    //     .catch(function(error) {
-    //       console.log('Error accessing media devices: ' + error);
-    //     });
-    // }
+    function getLocalStream() {
+      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(function(stream) {
+          var localVideo = document.getElementById('localVideo');
+          localVideo.srcObject = stream;
+          establishCall(stream);
+        })
+        .catch(function(error) {
+          console.log('Error accessing media devices: ' + error);
+        });
+    }
 
     // Establish a call with another peer
     function establishCall(localStream) {
