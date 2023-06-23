@@ -33,11 +33,11 @@
     // }
     var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
     peer.on('call', function(call) {
-      getUserMedia({video: true, audio: false}, function(stream) {
-        call.answer(stream); // Answer the call with an A/V stream.
+      getUserMedia({video: true, audio: false}, function(stream2) {
+        call.answer(stream2); // Answer the call with an A/V stream.
         call.on('stream', function(remoteStream) {
            var localVideo = document.getElementById('localVideo');
-           localVideo.srcObject = stream;
+           localVideo.srcObject = stream2;
         });
       }, function(err) {
         console.log('Failed to get local stream' ,err);
