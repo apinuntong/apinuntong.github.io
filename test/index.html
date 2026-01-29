@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>MQTT Status Monitor</title>
+<script src="jquery.min.js" type="text/javascript"></script>
+<script src="mqttws31.js"></script>
+
+<style>
+  body {
+    font-family: Arial;
+    width: 420px;
+    margin: auto;
+  }
+
+  fieldset {
+    margin: 10px 0;
+    padding: 10px;
+  }
+
+  .lights {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0;
+  }
+
+  .light {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: gray;
+  }
+
+  .label {
+    text-align: center;
+    margin-top: 5px;
+  }
+
+  img {
+    width: 380px;
+    border: 1px solid #ccc;
+  }
+</style>
+</head>
+
+<body>
+
+<h2>MQTT Status Monitor</h2>
+
+<!-- DEVICE CONFIG -->
+<fieldset>
+<legend>DEVICE CONFIG</legend>
+ET ID:
+<input id="deviceId" value="et1">
+<button onclick="applyDevice()">Apply</button>
+</fieldset>
+
+<!-- STATUS LIGHTS -->
+<div class="lights">
+  <div>
+    <div id="toilet" class="light"></div>
+    <div class="label">ห้องน้ำ</div>
+  </div>
+  <div>
+    <div id="dorm" class="light"></div>
+    <div class="label">ห้องนอน</div>
+  </div>
+</div>
+
+<!-- OUT CONTROL -->
+<fieldset>
+<legend>OUT CONTROL</legend>
+<button onclick="outOn()">เปิด (ON)</button>
+<button onclick="outOff()">ปิด (OFF)</button>
+</fieldset>
+
+<!-- IMAGE -->
+<img id="image">
+
+<script>
+/* ===== MQTT CONFIG ===== */
+const BROKER = "mqtt.aj-tay.com";
+const PORT   = 15675;
+const PATH   = "/ws";
+
+const USERNAME = "cmmc_mqtt";
+const PASSWORD = "cmmc@1234";
+
+let DEVICE_ID = "et1";
+let topics = {};
+
+function buildTopics() {
+  const base = `/th/${DEVICE_ID}`;
+  return {
+    toilet: `${base}/toilet`,
+    dorm:   `${base}/dormitory`,
+    image:  `${base}/image`,
+    out:    `${base}/out`
+  };
+}
+
+/* ===== UI ===== */
+function setLight(id, state) {
+  document.getElementById(id).style.background =
+    state === "ON" ? "green" : "red";
+}
+
+function showImage(base64) {
+  document.getElementById("image").src =
+    "data:image/jpeg;base64," + base64;
+}
+
+/* ===== MQTT ===== */
+let client;
+
+function connectMQTT() {
+  topics = buildTopics();
+
+  client = new Paho.MQTT.Client(
+    BROKER,
+    PORT,
+    PATH,
+    "web_" + Math.random().toString(16).substr(2, 8)
+  );
+
+  client.onConnectionLost = () =>
+    console.log("Connection lost");
+
+  client.onMessageArrived = msg => {
+    const payload = msg.payloadString;
+    if (msg.destinationName === topics.toilet)
+      setLight("toilet", payload);
+
+    else if (msg.destinationName === topics.dorm)
+      setLight("dorm", payload);
+
+    else if (msg.destinationName === topics.image)
+      showImage(payload);
+
+    else if (msg.destinationName === topics.out)
+      console.log("OUT:", payload);
+  };
+
+  client.connect({
+    userName: USERNAME,
+    password: PASSWORD,
+    onSuccess: () => {
+      console.log("Connected");
+
+      Object.values(topics).forEach(t =>
+        client.subscribe(t)
+      );
+    }
+  });
+}
+
+function applyDevice() {
+  DEVICE_ID = document.getElementById("deviceId").value;
+
+  Object.values(topics).forEach(t =>
+    client.unsubscribe(t)
+  );
+
+  topics = buildTopics();
+
+  Object.values(topics).forEach(t =>
+    client.subscribe(t)
+  );
+
+  console.log("Changed to", DEVICE_ID);
+}
+
+/* ===== OUT ===== */
+function outOn() {
+  client.send(topics.out, "ON");
+  client.send(topics.toilet, "ON");
+  client.send(topics.dorm, "ON");
+}
+
+function outOff() {
+  client.send(topics.out, "OFF");
+  client.send(topics.toilet, "OFF");
+  client.send(topics.dorm, "OFF");
+}
+
+/* ===== START ===== */
+connectMQTT();
+</script>
+
+</body>
+</html>
